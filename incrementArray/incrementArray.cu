@@ -1,11 +1,16 @@
 /*
-Simple non visual example to attempt creating a makefile
-This example will increment the contents of an array
+Simple non visual example to attempt creating a makefile for cuda
+This example will increment the contents of an array by 1
+This program accepts command line argument to set the 
+size of the array and the block size otherwise it uses default values.
+No validation checks on these inputs for non integer args or 
+if they exceed the maximum block size for device
 */
 
 #include <stdio.h>
 #include <assert.h>
 #include <cuda.h>
+#include <sstream>
 
 // increment array on Host
 void hostIncrement(int* a, int N)
@@ -30,9 +35,24 @@ __global__ void deviceIncrement(int* a, int N)
 }
 
 // main function
-int main(void)
+int main(int argc, char** argv)
 {
-	int N=16;
+	int N;
+	int blockSize;
+	// Check command line arguments
+	if(argc == 1)
+	{
+		// none given, use default;
+		N=16;
+		blockSize=4;
+	}
+	else
+	{
+		std::istringstream(argv[1]) >> N;	
+		std::istringstream(argv[2]) >> blockSize;
+	}
+
+	// calculate size of arrays
 	size_t size=N*sizeof(int);
 
 	// Allocate memory for arrays on host	
@@ -56,7 +76,6 @@ int main(void)
 	hostIncrement(a_h, N);
 
 	// Do calculation on device
-	int blockSize = 4;
 	int nBlocks = N/blockSize + (N%blockSize == 0?0:1);
 	
 	deviceIncrement <<< nBlocks, blockSize >>> (a_d, N);
