@@ -1,5 +1,6 @@
 #
-# Makefile for simple example of using thrust library
+# Makefile for simple example which creates an image of 
+# an evenly spaced voronoi grid
 #
 
 CC=nvcc
